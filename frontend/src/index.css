@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #09090b;
+  --surface: #141414;
+  --border: #27272a;
+  --text: #ffffff;
+  --text-muted: #a1a1aa;
+  --xp: #ff5c00;
+  --level: #ccff00;
+  --action: #007aff;
+  --success: #39ff14;
+  --danger: #ff3b30;
+  /* Tinted dots used by the body grain backdrop. ThemeContext overrides these
+     so each extension theme has its own ambient color flecks. */
+  --grain-1: rgba(255, 92, 0, 0.06);
+  --grain-2: rgba(204, 255, 0, 0.04);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Subtle grain backdrop for depth (themed via CSS vars) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(var(--grain-1) 1px, transparent 1px),
+    radial-gradient(var(--grain-2) 1px, transparent 1px);
+  background-size: 28px 28px, 19px 19px;
+  background-position: 0 0, 9px 9px;
+  mix-blend-mode: screen;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+.font-display {
+  font-family: "Unbounded", "Outfit", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-heading {
+  font-family: "Outfit", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.font-mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Tactile push button */
+.btn-push {
+  position: relative;
+  border-radius: 0.85rem;
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 80ms ease-out, box-shadow 80ms ease-out, filter 120ms;
+  border-bottom: 4px solid;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-push:active {
+  transform: translateY(3px);
+  border-bottom-width: 1px;
+}
+
+.btn-push:disabled {
+  filter: grayscale(0.6) brightness(0.7);
+  cursor: not-allowed;
+}
+
+.btn-action {
+  background: var(--action);
+  color: white;
+  border-color: #0050aa;
+}
+
+.btn-xp {
+  background: var(--xp);
+  color: #1a0a00;
+  border-color: #a83a00;
+}
+
+.btn-level {
+  background: var(--level);
+  color: #0d1a00;
+  border-color: #6a8a00;
+}
+
+.btn-ghost {
+  background: var(--surface);
+  color: var(--text);
+  border-color: #2a2a2a;
+}
+
+.bento {
+  background: var(--surface);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+}
+
+.bento-warm {
+  background: linear-gradient(150deg, rgba(255, 92, 0, 0.18), rgba(255, 92, 0, 0.04));
+  border: 2px solid rgba(255, 92, 0, 0.35);
+  border-radius: 1rem;
+}
+
+.bento-lime {
+  background: linear-gradient(150deg, rgba(204, 255, 0, 0.18), rgba(204, 255, 0, 0.04));
+  border: 2px solid rgba(204, 255, 0, 0.35);
+  border-radius: 1rem;
+}
+
+.glass-header {
+  background: rgba(9, 9, 11, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.scroll-area {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+.scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.45); }
+  50% { box-shadow: 0 0 18px 4px rgba(204, 255, 0, 0.4); }
+}
+.glow-lime { animation: pulseGlow 2.6s ease-in-out infinite; }
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+.flicker { animation: flicker 1.8s ease-in-out infinite; }
+
+@layer base {
+  :root {
+    --background: 240 6% 6%;
+    --foreground: 0 0% 100%;
+    --card: 240 4% 10%;
+    --card-foreground: 0 0% 100%;
+    --popover: 240 4% 10%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 211 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4% 14%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 240 4% 14%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 24 100% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 4 100% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 24 100% 50%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}

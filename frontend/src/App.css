@@ -1,0 +1,5 @@
+/* App-level overrides; most styling lives in index.css and Tailwind */
+.App {
+  min-height: 100%;
+  background: var(--bg);
+}

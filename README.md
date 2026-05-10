@@ -1,152 +1,132 @@
-# Here are your Instructions
+# RepUp — Duolingo for Developers
+
+RepUp is a Chrome extension that gamifies your coding habits. Build daily streaks, earn XP, beat coding challenges, and get real-time AI code reviews injected directly into GitHub — all without leaving your workflow.
+
+## Features
+
+### 🔥 Daily Streaks & XP
+Track your GitHub activity (commits, pull requests, READMEs, issue comments) and earn XP every day. Level up as you code more consistently.
+
+### ⚔️ Daily Coding Challenge
+A new bugfix challenge every day in a randomly selected language (Python, JavaScript, TypeScript, Go, Rust). Solve it fast for a speed bonus. Top scores go on the leaderboard.
+
+### 🤖 AI Code Review Sidebar
+A Shadow DOM sidebar injected directly into GitHub that reviews any file or PR diff using Google Gemini. Get instant feedback on bugs, security vulnerabilities, performance issues, and code smells — without leaving GitHub.
+
+### 🏆 Leaderboard
+Compete on the daily challenge leaderboard. Only correct solutions appear — partial credit is awarded for near-misses but kept off the board.
+
+### 🎨 Decoration Shop
+Spend XP on cosmetic themes and decorations to personalise your RepUp experience.
+
+### 📝 Todo List & Repo Bookmarks
+Manage your dev tasks and bookmark frequently visited GitHub repos directly inside the extension.
+
+---
+
+## Tech Stack
+
+| Layer | Tech |
+|---|---|
+| Frontend | React, Tailwind CSS, Chrome Extension MV3 |
+| Backend | Python, FastAPI, Uvicorn |
+| AI | Google Gemini 2.5 Pro |
+| Database | Firebase Firestore |
+| Auth | Firebase Auth, GitHub OAuth |
+| Hosting | Google Cloud Run |
+| APIs | GitHub REST API, Chrome Identity, Chrome Storage, Chrome Side Panel |
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js + Yarn
+- Python 3.11+
+- A Firebase project
+- A GitHub OAuth App
+- A Gemini API key
+- Google Cloud CLI (for deployment)
+
+### Frontend Setup
+```bash
+cd frontend
+yarn install
+```
+
+Create `frontend/.env`:
+```
+REACT_APP_BACKEND_URL=https://your-backend-url.run.app
+REACT_APP_GH_OAUTH_CLIENT_ID=your_github_oauth_client_id
+```
+
+### Backend Setup
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+Create `backend/.env`:
+```
+GEMINI_API_KEY=your_gemini_api_key
+GITHUB_OAUTH_CLIENT_ID=your_github_oauth_client_id
+GITHUB_OAUTH_CLIENT_SECRET=your_github_oauth_client_secret
+CORS_ORIGINS=*
+```
+
+Run locally:
+```bash
+uvicorn server:app --reload --port 8080
+```
+
+### Build the Extension
+```bash
+node scripts/build-extension.js
+```
+
+Then load `extension/` as an unpacked extension in `chrome://extensions`.
+
+---
+
+## Deployment
+
+### Deploy Backend to Google Cloud Run
+```bash
+cd backend
+gcloud run deploy repup-backend \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated
+```
+
+Set environment variables:
+```bash
+gcloud run services update repup-backend \
+  --region us-central1 \
+  --set-env-vars GEMINI_API_KEY=...,GITHUB_OAUTH_CLIENT_ID=...,GITHUB_OAUTH_CLIENT_SECRET=...,CORS_ORIGINS=*
+```
+
+---
+
+## Project Structure
 
 ```
-RepUp
-├─ .emergent
-│  └─ emergent.yml
-├─ backend
-│  ├─ Procfile
-│  ├─ requirements.txt
-│  ├─ server.py
-│  └─ tests
-│     ├─ backend_test.py
-│     └─ __init__.py
-├─ backend_test.py
-├─ design_guidelines.json
-├─ extension
-│  ├─ asset-manifest.json
-│  ├─ background.js
-│  ├─ content
-│  │  ├─ config.js
-│  │  └─ gh-review.js
-│  ├─ icons
-│  │  ├─ icon128.png
-│  │  ├─ icon16.png
-│  │  └─ icon48.png
-│  ├─ index.html
-│  ├─ manifest.json
-│  ├─ sidepanel.html
-│  └─ static
-│     ├─ css
-│     │  ├─ main.83031f28.css
-│     │  └─ main.83031f28.css.map
-│     └─ js
-│        ├─ main.4ac3ea7b.js
-│        ├─ main.4ac3ea7b.js.LICENSE.txt
-│        └─ main.4ac3ea7b.js.map
-├─ frontend
-│  ├─ components.json
-│  ├─ craco.config.js
-│  ├─ jsconfig.json
-│  ├─ package.json
-│  ├─ plugins
-│  │  └─ health-check
-│  │     └─ webpack-health-plugin.js
-│  ├─ postcss.config.js
-│  ├─ public
-│  │  └─ index.html
-│  ├─ README.md
-│  ├─ src
-│  │  ├─ App.css
-│  │  ├─ App.js
-│  │  ├─ components
-│  │  │  ├─ repup
-│  │  │  │  ├─ CodeEditor.jsx
-│  │  │  │  ├─ DayCountdown.jsx
-│  │  │  │  ├─ ErrorBoundary.jsx
-│  │  │  │  ├─ Layout.jsx
-│  │  │  │  ├─ LevelUpOverlay.jsx
-│  │  │  │  ├─ QuestItem.jsx
-│  │  │  │  ├─ ReviewToggle.jsx
-│  │  │  │  ├─ WeekCountdown.jsx
-│  │  │  │  └─ XPBar.jsx
-│  │  │  └─ ui
-│  │  │     ├─ accordion.jsx
-│  │  │     ├─ alert-dialog.jsx
-│  │  │     ├─ alert.jsx
-│  │  │     ├─ aspect-ratio.jsx
-│  │  │     ├─ avatar.jsx
-│  │  │     ├─ badge.jsx
-│  │  │     ├─ breadcrumb.jsx
-│  │  │     ├─ button.jsx
-│  │  │     ├─ calendar.jsx
-│  │  │     ├─ card.jsx
-│  │  │     ├─ carousel.jsx
-│  │  │     ├─ checkbox.jsx
-│  │  │     ├─ collapsible.jsx
-│  │  │     ├─ command.jsx
-│  │  │     ├─ context-menu.jsx
-│  │  │     ├─ dialog.jsx
-│  │  │     ├─ drawer.jsx
-│  │  │     ├─ dropdown-menu.jsx
-│  │  │     ├─ form.jsx
-│  │  │     ├─ hover-card.jsx
-│  │  │     ├─ input-otp.jsx
-│  │  │     ├─ input.jsx
-│  │  │     ├─ label.jsx
-│  │  │     ├─ menubar.jsx
-│  │  │     ├─ navigation-menu.jsx
-│  │  │     ├─ pagination.jsx
-│  │  │     ├─ popover.jsx
-│  │  │     ├─ progress.jsx
-│  │  │     ├─ radio-group.jsx
-│  │  │     ├─ resizable.jsx
-│  │  │     ├─ scroll-area.jsx
-│  │  │     ├─ select.jsx
-│  │  │     ├─ separator.jsx
-│  │  │     ├─ sheet.jsx
-│  │  │     ├─ skeleton.jsx
-│  │  │     ├─ slider.jsx
-│  │  │     ├─ sonner.jsx
-│  │  │     ├─ switch.jsx
-│  │  │     ├─ table.jsx
-│  │  │     ├─ tabs.jsx
-│  │  │     ├─ textarea.jsx
-│  │  │     ├─ toast.jsx
-│  │  │     ├─ toaster.jsx
-│  │  │     ├─ toggle-group.jsx
-│  │  │     ├─ toggle.jsx
-│  │  │     └─ tooltip.jsx
-│  │  ├─ contexts
-│  │  │  ├─ AuthContext.js
-│  │  │  └─ ThemeContext.jsx
-│  │  ├─ firebase.js
-│  │  ├─ hooks
-│  │  │  ├─ use-toast.js
-│  │  │  └─ useReviewEnabled.js
-│  │  ├─ index.css
-│  │  ├─ index.js
-│  │  ├─ lib
-│  │  │  ├─ api.js
-│  │  │  ├─ auth.js
-│  │  │  ├─ github.js
-│  │  │  ├─ monaco-config.js
-│  │  │  ├─ notes.js
-│  │  │  ├─ themes.js
-│  │  │  ├─ utils.js
-│  │  │  └─ xp.js
-│  │  └─ pages
-│  │     ├─ Challenge.jsx
-│  │     ├─ Dashboard.jsx
-│  │     ├─ Leaderboard.jsx
-│  │     ├─ Login.jsx
-│  │     ├─ Notes.jsx
-│  │     └─ Themes.jsx
-│  ├─ tailwind.config.js
-│  └─ yarn.lock
-├─ memory
-│  └─ PRD.md
-├─ PRIVACY.md
-├─ README.md
-├─ scripts
-│  ├─ generate_icons.py
-│  └─ predict_extension_id.py
-├─ tests
-│  └─ __init__.py
-├─ test_reports
-│  ├─ iteration_1.json
-│  └─ pytest
-│     └─ pytest_results.xml
-└─ test_result.md
-
+RepUp/
+├── backend/          # FastAPI server
+├── extension/        # Built Chrome extension (load this in Chrome)
+├── frontend/         # React source code
+├── scripts/          # Build scripts
+└── PRIVACY.md        # Privacy policy
 ```
+
+---
+
+## Privacy
+
+See [PRIVACY.md](./PRIVACY.md) for full details on data collection and usage.
+
+---
+
+## License
+
+MIT

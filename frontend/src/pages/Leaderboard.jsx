@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { collection, getDocs, orderBy, query, limit } from "firebase/firestore";
+import { collection, getDocs, query, limit } from "firebase/firestore";
 import { Crown, Medal, Loader2, Trophy, Calendar, CalendarRange, Filter, Users, X, Timer } from "lucide-react";
 import { db } from "../firebase";
 import { useAuth } from "../contexts/AuthContext";
@@ -146,12 +146,18 @@ export default function Leaderboard() {
       setLoading(true);
       setError(null);
       try {
+        // The daily leaderboard is ordered by SPEED (fastest correct fix wins),
+        // NOT by XP. We fetch a wider window without a Firestore orderBy so we
+        // don't need a composite index, then filter to correct submissions and
+        // sort by elapsed_seconds ascending client-side.
         const col = collection(db, "submissions", today, "users");
-        const q = query(col, orderBy("total", "desc"), limit(50));
+        const q = query(col, limit(200));
         const snap = await getDocs(q);
         const list = snap.docs
           .map((d) => d.data())
-          .filter((r) => r.correct === true);
+          .filter((r) => r.correct === true && typeof r.elapsed_seconds === "number")
+          .sort((a, b) => a.elapsed_seconds - b.elapsed_seconds)
+          .slice(0, 50);
         if (!cancelled) setTodayRows(list);
       } catch (e) {
         if (!cancelled) setError(e?.message || "Failed to load leaderboard");
@@ -283,9 +289,12 @@ export default function Leaderboard() {
             }
           }
         }
-        // Sort by total XP desc, then by display name for stable 0-XP ordering.
+        // Sort by total XP desc, then by display name for stable ordering.
+        // Filter out users who haven't earned any XP this week — they only
+        // appear on the weekly board once they've actually contributed.
         const list = Array.from(byUid.values())
           .map(({ _usedDates, _latestDate, ...rest }) => rest) // drop scratch fields
+          .filter((r) => r.total > 0)
           .sort(
             (a, b) =>
               b.total - a.total ||

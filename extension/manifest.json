@@ -3,7 +3,6 @@
   "name": "RepUp — Duolingo for devs",
   "version": "1.1.0",
   "description": "Streak your commits, level up, beat the daily code challenge — plus a real-time AI code review sidebar on every GitHub PR and file.",
-  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAttxsBKb36nL8CY94RyUApk28erdMaQsVrsH6bc0PZ+OutKHwJLpTztHz1g2coS72WUgpcB2f5lIkQ7mJzQQOCXgQNVA+9OuHwJi1j+k+0j6RjBbhWXAJ+A7JkLfjalSaDVn5UMM4jEhK4isoFmL9udHepbEcyDyD/TuZz+D8ngzAl2uTvJwPkrkhnCihYE9EvdmM0Hv5aNTbn6NOCZvz+Ehz4wFJFIIsQwGptLID0IL9va+4tPKxvH2+yZIdxz+u8ww99REnonhJMFOBZzY5cJky8BaaqMsDcUyZu2m4Z7fk5Zv6FfnbSWHOQlx8JlCwvBPTF+f4OrH6TDkTfSI+iwIDAQAB",
   "action": {
     "default_title": "Open RepUp"
   },
@@ -50,5 +49,6 @@
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
-  }
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAttxsBKb36nL8CY94RyUApk28erdMaQsVrsH6bc0PZ+OutKHwJLpTztHz1g2coS72WUgpcB2f5lIkQ7mJzQQOCXgQNVA+9OuHwJi1j+k+0j6RjBbhWXAJ+A7JkLfjalSaDVn5UMM4jEhK4isoFmL9udHepbEcyDyD/TuZz+D8ngzAl2uTvJwPkrkhnCihYE9EvdmM0Hv5aNTbn6NOCZvz+Ehz4wFJFIIsQwGptLID0IL9va+4tPKxvH2+yZIdxz+u8ww99REnonhJMFOBZzY5cJky8BaaqMsDcUyZu2m4Z7fk5Zv6FfnbSWHOQlx8JlCwvBPTF+f4OrH6TDkTfSI+iwIDAQAB"
 }

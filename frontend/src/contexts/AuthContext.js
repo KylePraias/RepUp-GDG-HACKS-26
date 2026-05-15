@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { signInWithGitHub, signOut as authSignOut } from "../lib/auth";
+import { todayUtcDateString, yesterdayUtcDateString } from "../lib/xp";
 
 const AuthCtx = createContext(null);
 
@@ -58,6 +59,27 @@ export function AuthProvider({ children }) {
       return seed;
     }
     const data = snap.data();
+    // Stale-streak reset: if the user's last active day is older than
+    // yesterday (i.e. they missed at least one full day), their streak must
+    // drop to 0. We do this once at profile load so the dashboard, header
+    // pill, and any other consumer see the corrected value immediately.
+    const today = todayUtcDateString();
+    const yesterday = yesterdayUtcDateString();
+    const lastActive = data.lastActiveDate || null;
+    const currentStreak = data.streak || 0;
+    const isStale =
+      currentStreak > 0 && lastActive !== today && lastActive !== yesterday;
+    if (isStale) {
+      try {
+        await updateDoc(ref, { streak: 0, updatedAt: serverTimestamp() });
+        data.streak = 0;
+      } catch (e) {
+        // If the write fails (rules / offline), still show the corrected value
+        // locally so the user isn't lied to about their streak.
+        console.warn("stale streak reset write failed", e?.code || e?.message);
+        data.streak = 0;
+      }
+    }
     setProfile(data);
     return data;
   }, []);

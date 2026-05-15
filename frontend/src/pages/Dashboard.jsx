@@ -36,7 +36,11 @@ export default function Dashboard() {
       const a = await fetchTodayActivity(profile.githubLogin, ghToken || undefined);
       setActivity(a);
       setLastSyncedAt(new Date());
-      await maybeUpdateStreak(a);
+      // NOTE: streak is NOT touched here. The daily streak is driven by XP-
+      // earning actions (claiming a quest or submitting the daily challenge),
+      // not by raw GitHub activity. See `awardXp()` in lib/xp.js for the
+      // streak bump and AuthContext for the stale-streak reset on profile
+      // load.
     } catch (e) {
       console.warn("activity fetch failed", e);
       setActivityError(
@@ -47,29 +51,6 @@ export default function Dashboard() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.githubLogin, ghToken]);
-
-  const maybeUpdateStreak = useCallback(
-    async (a) => {
-      if (!user || !profile) return;
-      const totalToday = a.commits + a.prs + a.readme + a.issueComments;
-      const last = profile.lastActiveDate;
-      let newStreak = profile.streak || 0;
-      if (totalToday > 0 && last !== today) {
-        const yesterday = new Date();
-        yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-        const yStr = yesterday.toISOString().slice(0, 10);
-        newStreak = last === yStr ? newStreak + 1 : 1;
-        const ref = doc(db, "users", user.uid);
-        await updateDoc(ref, {
-          streak: newStreak,
-          lastActiveDate: today,
-          updatedAt: serverTimestamp(),
-        });
-        setProfile({ ...profile, streak: newStreak, lastActiveDate: today });
-      }
-    },
-    [user, profile, today, setProfile],
-  );
 
   useEffect(() => {
     refreshActivity();

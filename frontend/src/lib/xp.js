@@ -42,19 +42,31 @@ export function todayUtcDateString(d = new Date()) {
   return d.toISOString().slice(0, 10);
 }
 
+// UTC date string for "yesterday" relative to `d` (default = now). Used to
+// decide whether earning XP today extends the streak or resets it to 1.
+export function yesterdayUtcDateString(d = new Date()) {
+  const y = new Date(d.getTime());
+  y.setUTCDate(y.getUTCDate() - 1);
+  return y.toISOString().slice(0, 10);
+}
+
 /**
  * Award XP to the user from any source (daily challenge, quest claim, etc).
  *
- * Maintains three things:
+ * Maintains four things:
  *   - `xp`            — lifetime cumulative XP (never resets)
  *   - `level`         — derived from xp (never resets)
  *   - `dailyXp.{YYYY-MM-DD}` — per-day XP map, used by the weekly leaderboard.
  *     Uses Firestore atomic `increment` so concurrent writes (e.g. claiming
  *     two quests fast) don't race.
+ *   - `streak` / `lastActiveDate` — the daily streak. Any XP earned in a day
+ *     counts as "active today". The first XP of the day either extends the
+ *     existing streak (if yesterday was active) or resets it to 1 (if a day
+ *     was missed). Subsequent XP earns on the same day don't re-bump.
  *
- * The weekly leaderboard sums `dailyXp` over the current Mon→Sun UTC window —
- * because EVERY XP source funnels through this helper, weekly XP automatically
- * reflects all sources, not just the daily challenge.
+ * Because EVERY XP source funnels through this helper, both the daily
+ * challenge AND quest claims (and any future source) automatically contribute
+ * to the streak.
  *
  * Returns { newXp, newLevel, oldLevel } so callers can trigger a level-up
  * celebration.
@@ -83,20 +95,37 @@ export async function awardXp({
     };
   }
   const dStr = date || todayUtcDateString();
+  const yStr = yesterdayUtcDateString(new Date(`${dStr}T00:00:00Z`));
   const oldXp = profile.xp || 0;
   const newXp = oldXp + safe;
   const oldLevel = profile.level || levelFromXp(oldXp);
   const newLevel = levelFromXp(newXp);
 
-  const ref = doc(db, "users", user.uid);
-  await updateDoc(ref, {
+  // Streak: first XP earn of the day extends/resets the streak. Same-day
+  // re-earns are no-ops for streak purposes.
+  const lastActive = profile.lastActiveDate || null;
+  let nextStreak = profile.streak || 0;
+  let streakChanged = false;
+  if (lastActive !== dStr) {
+    nextStreak = lastActive === yStr ? nextStreak + 1 : 1;
+    streakChanged = true;
+  }
+
+  const updates = {
     xp: newXp,
     level: newLevel,
     [`dailyXp.${dStr}`]: increment(safe),
     updatedAt: serverTimestamp(),
-  });
+  };
+  if (streakChanged) {
+    updates.streak = nextStreak;
+    updates.lastActiveDate = dStr;
+  }
 
-  // Optimistic local update so the UI reflects the new XP immediately.
+  const ref = doc(db, "users", user.uid);
+  await updateDoc(ref, updates);
+
+  // Optimistic local update so the UI reflects the new XP + streak immediately.
   const prevDaily = profile.dailyXp || {};
   const nextDailyForDate = (prevDaily[dStr] || 0) + safe;
   if (typeof setProfile === "function") {
@@ -105,6 +134,7 @@ export async function awardXp({
       xp: newXp,
       level: newLevel,
       dailyXp: { ...prevDaily, [dStr]: nextDailyForDate },
+      ...(streakChanged ? { streak: nextStreak, lastActiveDate: dStr } : {}),
     });
   }
 
